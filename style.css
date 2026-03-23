@@ -1,0 +1,342 @@
+/* ── 기본 ──────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy:   #1a3a5c;
+  --blue:   #2980b9;
+  --blue-l: #3498db;
+  --gold:   #f39c12;
+  --bg:     #f5f6fa;
+  --card:   #ffffff;
+  --text:   #333;
+  --sub:    #999;
+  --border: #ddd;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bot: env(safe-area-inset-bottom, 0px);
+}
+
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+
+body {
+  font-family: 'Noto Sans KR', 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100dvh;
+  padding-bottom: calc(24px + var(--safe-bot));
+}
+
+/* ── 헤더 ──────────────────────────────────────────────── */
+header {
+  background: var(--card);
+  padding: calc(12px + var(--safe-top)) 16px 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 700px;
+  margin: 0 auto;
+}
+.header-icon {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.header-title {
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: 1.15em;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, #1a3a5c 0%, #2980b9 60%, #1a3a5c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.install-btn {
+  flex-shrink: 0;
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  padding: 5px 12px;
+  font-size: 0.75em;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* ── 컨트롤 ─────────────────────────────────────────────── */
+.control-wrap {
+  max-width: 700px;
+  margin: 16px auto 0;
+  padding: 0 16px;
+}
+
+/* ── 검색 폼 ────────────────────────────────────────────── */
+.search-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.search-form input {
+  flex: 1;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  font-size: 0.9em;
+  font-family: inherit;
+  background: var(--card);
+  transition: border-color 0.2s;
+  min-width: 0;
+}
+.search-form input:focus {
+  outline: none;
+  border-color: var(--blue-l);
+}
+.search-form button {
+  flex-shrink: 0;
+  height: 44px;
+  background: var(--blue-l);
+  color: #fff;
+  border: none;
+  padding: 0 16px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 0.88em;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+.search-form button:active { background: var(--blue); }
+.search-form button:disabled { background: #a0c4e0; cursor: not-allowed; }
+
+/* ── 필터 바 ────────────────────────────────────────────── */
+.filter-bar {
+  background: var(--card);
+  border-radius: 10px;
+  padding: 10px 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  margin-bottom: 16px;
+}
+.filter-label {
+  font-size: 0.82em;
+  font-weight: bold;
+  color: #888;
+  display: block;
+  margin-bottom: 8px;
+}
+.filter-scroll {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+.filter-scroll::-webkit-scrollbar { display: none; }
+.filter-btn {
+  flex-shrink: 0;
+  height: 32px;
+  padding: 0 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  background: var(--card);
+  color: #555;
+  font-size: 0.85em;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+.filter-btn.active {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #fff;
+  font-weight: bold;
+}
+.filter-count {
+  display: block;
+  text-align: right;
+  font-size: 0.82em;
+  color: #888;
+  font-weight: bold;
+  margin-top: 6px;
+}
+
+/* ── 진행 바 ─────────────────────────────────────────────── */
+.progress-wrap {
+  max-width: 700px;
+  margin: 0 auto 16px;
+  padding: 0 16px;
+}
+.progress-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+#progress-container {
+  flex: 1;
+  background: #e8ecf0;
+  height: 10px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+#progress-bar {
+  height: 100%;
+  width: 0%;
+  border-radius: 12px;
+  background: linear-gradient(90deg,
+    #e74c3c, #e67e22, #f1c40f, #2ecc71, #3498db, #9b59b6, #e74c3c
+  );
+  background-size: 400% 100%;
+  animation: rainbowFlow 4s linear infinite;
+  transition: width 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+@keyframes rainbowFlow {
+  0%   { background-position: 0% 0; }
+  100% { background-position: 400% 0; }
+}
+#progress-pct {
+  font-size: 0.78em;
+  font-weight: 700;
+  white-space: nowrap;
+  min-width: 32px;
+  background: linear-gradient(90deg,#e74c3c,#e67e22,#f1c40f,#2ecc71,#3498db,#9b59b6,#e74c3c);
+  background-size: 400% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: rainbowFlow 4s linear infinite;
+}
+
+/* ── 뉴스 목록 ───────────────────────────────────────────── */
+#news-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+.news-item {
+  background: var(--card);
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.4s ease, transform 0.4s ease, box-shadow 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.news-item.show  { opacity: 1; transform: translateY(0); }
+.news-item:active { background: #f8fafc; }
+
+.news-item a {
+  text-decoration: none;
+  color: #1a0dab;
+  font-size: 0.95em;
+  display: block;
+  margin-bottom: 8px;
+  line-height: 1.55;
+  transition: color 0.2s;
+}
+.news-score {
+  font-size: 0.95em;
+  margin-bottom: 6px;
+  letter-spacing: 2px;
+  color: var(--gold);
+}
+.news-meta  { font-size: 0.78em; color: var(--sub); margin-top: 4px; }
+.no-result  { text-align: center; color: #aaa; margin-top: 60px; font-size: 1em; }
+
+/* ── 페이지네이션 ────────────────────────────────────────── */
+#pagination {
+  max-width: 700px;
+  margin: 24px auto 48px;
+  padding: 0 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+#pagination button {
+  background: var(--blue-l);
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  cursor: pointer;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 0.85em;
+  font-family: inherit;
+  min-width: 60px;
+  -webkit-tap-highlight-color: transparent;
+}
+#pagination button:active:not(:disabled) { background: var(--blue); }
+#pagination button:disabled { background: #ccc; cursor: not-allowed; }
+#pagination span {
+  font-weight: bold;
+  font-size: 0.9em;
+  color: #555;
+  padding: 0 4px;
+}
+
+/* ── 빈 상태 ───────────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 60px 32px;
+}
+.empty-icon  { font-size: 3em; margin-bottom: 16px; }
+.empty-title { font-size: 1.05em; font-weight: 700; margin-bottom: 8px; }
+.empty-desc  { font-size: 0.88em; color: var(--sub); line-height: 1.7; }
+
+/* ── 토스트 ────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: calc(24px + var(--safe-bot));
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: #1a2332;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 0.88em;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  transition: transform 0.3s ease;
+  z-index: 999;
+  pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ── 서버 오류 오버레이 ──────────────────────────────────── */
+#reconnect-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 99999;
+}
+
+/* ── 반응형 (태블릿+) ──────────────────────────────────── */
+@media (min-width: 600px) {
+  #news-list { grid-template-columns: repeat(2, 1fr); }
+  .header-title { font-size: 1.5em; }
+  .search-form button { padding: 0 24px; font-size: 0.95em; }
+}
+@media (min-width: 960px) {
+  #news-list { grid-template-columns: repeat(2, 1fr); max-width: 1000px; }
+  .control-wrap { max-width: 1000px; }
+  #pagination { max-width: 1000px; }
+  .progress-wrap { max-width: 1000px; }
+}

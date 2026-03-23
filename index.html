@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1a3a5c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Banking News">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <title>Banking News Monitoring</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- 헤더 -->
+<header>
+  <div class="header-content">
+    <div class="header-logo">
+      <img src="icon-192.png" alt="우리은행" class="header-icon">
+    </div>
+    <span class="header-title">Banking News Monitoring</span>
+    <button class="install-btn" id="install-btn" style="display:none">＋ 홈추가</button>
+  </div>
+</header>
+
+<!-- 검색 -->
+<div class="control-wrap">
+  <div class="search-form">
+    <input id="search_term" type="search"
+      placeholder="검색어 입력 (기본: 금융, 은행, 핀테크…)"
+      autocomplete="off" enterkeyhint="search">
+    <button id="search-btn" onclick="startSearch()">뉴스 수집 시작</button>
+  </div>
+
+  <!-- 필터 바 -->
+  <div class="filter-bar" id="filter-bar" style="display:none;">
+    <span class="filter-label">중요도</span>
+    <div class="filter-scroll">
+      <button class="filter-btn active" data-score="0" onclick="setFilter(0)">전체</button>
+      <button class="filter-btn" data-score="5" onclick="toggleFilter(5)">★★★★★</button>
+      <button class="filter-btn" data-score="4" onclick="toggleFilter(4)">★★★★☆</button>
+      <button class="filter-btn" data-score="3" onclick="toggleFilter(3)">★★★☆☆</button>
+      <button class="filter-btn" data-score="2" onclick="toggleFilter(2)">★★☆☆☆</button>
+      <button class="filter-btn" data-score="1" onclick="toggleFilter(1)">★☆☆☆☆</button>
+    </div>
+    <span class="filter-count" id="filter-count"></span>
+  </div>
+</div>
+
+<!-- 진행 바 -->
+<div class="progress-wrap" id="progress-wrap" style="display:none;">
+  <div class="progress-inner">
+    <div id="progress-container">
+      <div id="progress-bar"></div>
+    </div>
+    <span id="progress-pct">0%</span>
+  </div>
+</div>
+
+<!-- 뉴스 목록 -->
+<div id="news-list"></div>
+
+<!-- 페이지네이션 -->
+<div id="pagination"></div>
+
+<!-- 빈 상태 -->
+<div class="empty-state" id="empty-state">
+  <div class="empty-icon">📰</div>
+  <div class="empty-title">뉴스를 수집해보세요</div>
+  <div class="empty-desc">검색어를 입력하거나 버튼을 눌러<br>금융 뉴스를 수집합니다</div>
+</div>
+
+<!-- 토스트 -->
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
