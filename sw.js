@@ -1,5 +1,4 @@
-// ★ 버전 바꾸면 캐시 자동 갱신
-const CACHE_VER = 'banking-news-v2';
+const CACHE_VER = 'banking-news-v3';
 const STATIC_ASSETS = [
   './index.html',
   './app.js',
@@ -9,7 +8,6 @@ const STATIC_ASSETS = [
   './manifest.json',
 ];
 
-// ── 설치: 정적 자산 미리 캐싱 ─────────────────────────────
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE_VER).then(c => c.addAll(STATIC_ASSETS))
@@ -17,7 +15,6 @@ self.addEventListener('install', e => {
   self.skipWaiting();
 });
 
-// ── 활성화: 구 캐시 삭제 ──────────────────────────────────
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
@@ -27,31 +24,27 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
-// ── 요청 처리 ─────────────────────────────────────────────
 self.addEventListener('fetch', e => {
   const url = e.request.url;
 
-  // 외부 API / RSS 요청 → 항상 네트워크 (캐시 안 함)
-  if (url.includes('allorigins') ||
-      url.includes('corsproxy') ||
-      url.includes('thingproxy') ||
+  // Netlify Functions / 외부 RSS → 항상 네트워크 (캐시 안 함)
+  if (url.includes('/.netlify/functions/') ||
       url.includes('google.com') ||
       url.includes('fonts.googleapis') ||
       url.includes('fonts.gstatic')) {
     return;
   }
 
-  // 정적 자산 → Cache-First (캐시 있으면 즉시, 없으면 네트워크 후 저장)
+  // 정적 자산 → Cache-First
   e.respondWith(
     caches.match(e.request).then(cached => {
       if (cached) return cached;
       return fetch(e.request).then(resp => {
         if (resp && resp.status === 200 && resp.type !== 'opaque') {
-          const clone = resp.clone();
-          caches.open(CACHE_VER).then(c => c.put(e.request, clone));
+          caches.open(CACHE_VER).then(c => c.put(e.request, resp.clone()));
         }
         return resp;
-      }).catch(() => caches.match('./index.html')); // 오프라인 폴백
+      }).catch(() => caches.match('./index.html'));
     })
   );
 });
