@@ -16,49 +16,50 @@
 </head>
 <body>
 
-<!-- 헤더 -->
-<header>
-  <div class="header-content">
-    <div class="header-logo">
+<!-- ★ 스크롤 고정 영역: 헤더 + 검색 + 필터 묶음 -->
+<div class="sticky-controls">
+
+  <!-- 헤더 -->
+  <header>
+    <div class="header-content">
       <img src="icon-192.png" alt="우리은행" class="header-icon">
+      <span class="header-title">Banking News Monitoring</span>
+      <button class="install-btn" id="install-btn" style="display:none">＋ 홈추가</button>
     </div>
-    <span class="header-title">Banking News Monitoring</span>
-    <button class="install-btn" id="install-btn" style="display:none">＋ 홈추가</button>
-  </div>
-</header>
+  </header>
 
-<!-- 검색 -->
-<div class="control-wrap">
-  <div class="search-form">
-    <input id="search_term" type="search"
-      placeholder="검색어 입력 (기본: 금융, 은행, 핀테크…)"
-      autocomplete="off" enterkeyhint="search">
-    <button id="search-btn" onclick="startSearch()">뉴스 수집 시작</button>
+  <!-- 검색 -->
+  <div class="control-wrap">
+    <div class="search-form">
+      <input id="search_term" type="search"
+        placeholder="검색어 입력 (기본: 금융, 은행, 핀테크…)"
+        autocomplete="off" enterkeyhint="search">
+      <button id="search-btn">뉴스 수집 시작</button>
+    </div>
+
+    <!-- 필터 바: onclick 완전 제거 → app.js 이벤트만 사용 -->
+    <div class="filter-bar" id="filter-bar" style="display:none;">
+      <div class="filter-row">
+        <span class="filter-label">중요도</span>
+        <div class="filter-scroll">
+          <button class="filter-btn active" data-score="0">전체</button>
+          <button class="filter-btn" data-score="5">★★★★★</button>
+          <button class="filter-btn" data-score="4">★★★★☆</button>
+          <button class="filter-btn" data-score="3">★★★☆☆</button>
+          <button class="filter-btn" data-score="2">★★☆☆☆</button>
+          <button class="filter-btn" data-score="1">★☆☆☆☆</button>
+        </div>
+        <span class="filter-count" id="filter-count"></span>
+      </div>
+    </div>
   </div>
 
-  <!-- 필터 바: onclick 제거 → app.js addEventListener만 사용 -->
-  <div class="filter-bar" id="filter-bar" style="display:none;">
-    <div class="filter-top-row">
-      <span class="filter-label">중요도 필터</span>
-      <span class="filter-count" id="filter-count"></span>
-    </div>
-    <div class="filter-scroll">
-      <button class="filter-btn active" data-score="0">전체</button>
-      <button class="filter-btn" data-score="5">★★★★★</button>
-      <button class="filter-btn" data-score="4">★★★★☆</button>
-      <button class="filter-btn" data-score="3">★★★☆☆</button>
-      <button class="filter-btn" data-score="2">★★☆☆☆</button>
-      <button class="filter-btn" data-score="1">★☆☆☆☆</button>
-    </div>
-  </div>
-</div>
+</div><!-- /sticky-controls -->
 
 <!-- 진행 바 -->
 <div class="progress-wrap" id="progress-wrap" style="display:none;">
   <div class="progress-inner">
-    <div id="progress-container">
-      <div id="progress-bar"></div>
-    </div>
+    <div id="progress-container"><div id="progress-bar"></div></div>
     <span id="progress-pct">0%</span>
   </div>
 </div>
