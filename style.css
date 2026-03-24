@@ -120,14 +120,21 @@ header {
 .search-form button:active { background: var(--blue); }
 .search-form button:disabled { background: #a0c4e0; cursor: not-allowed; }
 
-/* ── 필터 바 ────────────────────────────────────────────── */
+/* ── 필터 바 ─────────────────────────────────────────────
+   [수정] flex-direction: column 추가
+   → "중요도" 라벨 / 별점 버튼 / 건수가 세로로 올바르게 쌓임
+────────────────────────────────────────────────────────── */
 .filter-bar {
   background: var(--card);
   border-radius: 10px;
   padding: 10px 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   margin-bottom: 16px;
+  /* ★ 핵심 수정: 세로 방향으로 배치 */
+  flex-direction: column;
 }
+
+/* 라벨 ─ flex 컨텍스트에서도 full-width로 표시 */
 .filter-label {
   font-size: 0.82em;
   font-weight: bold;
@@ -135,6 +142,8 @@ header {
   display: block;
   margin-bottom: 8px;
 }
+
+/* 별점 버튼 스크롤 영역 */
 .filter-scroll {
   display: flex;
   gap: 6px;
@@ -143,9 +152,10 @@ header {
   padding-bottom: 2px;
 }
 .filter-scroll::-webkit-scrollbar { display: none; }
+
 .filter-btn {
   flex-shrink: 0;
-  height: 32px;
+  height: 36px;               /* ★ 수정: 32→36px (터치 편의) */
   padding: 0 12px;
   border: 1.5px solid var(--border);
   border-radius: 20px;
@@ -164,6 +174,8 @@ header {
   color: #fff;
   font-weight: bold;
 }
+
+/* 건수 표시 */
 .filter-count {
   display: block;
   text-align: right;
@@ -259,37 +271,55 @@ header {
 .news-meta  { font-size: 0.78em; color: var(--sub); margin-top: 4px; }
 .no-result  { text-align: center; color: #aaa; margin-top: 60px; font-size: 1em; }
 
-/* ── 페이지네이션 ────────────────────────────────────────── */
+/* ── 페이지네이션 ─────────────────────────────────────────
+   [수정] 모바일에서 5개 요소가 한 줄에 균등하게 배치되도록
+   grid 레이아웃 적용 + 터치 영역 최소 44px 확보
+────────────────────────────────────────────────────────── */
 #pagination {
   max-width: 700px;
   margin: 24px auto 48px;
   padding: 0 16px;
-  display: flex;
-  justify-content: center;
+  display: grid;
+  /* 맨앞 | 이전 | 1/N | 다음 | 맨뒤 */
+  grid-template-columns: 1fr 1fr auto 1fr 1fr;
   align-items: center;
-  flex-wrap: wrap;
   gap: 6px;
 }
+
 #pagination button {
   background: var(--blue-l);
   color: #fff;
   border: none;
-  padding: 8px 14px;
+  padding: 0 8px;
   cursor: pointer;
   border-radius: 6px;
   font-weight: bold;
-  font-size: 0.85em;
+  font-size: 0.82em;
   font-family: inherit;
-  min-width: 60px;
+  width: 100%;
+  /* ★ 수정: 최소 높이 44px → 모바일 터치 영역 확보 */
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.2;
+  word-break: keep-all;
   -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s;
 }
 #pagination button:active:not(:disabled) { background: var(--blue); }
-#pagination button:disabled { background: #ccc; cursor: not-allowed; }
+#pagination button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
 #pagination span {
   font-weight: bold;
-  font-size: 0.9em;
+  font-size: 0.88em;
   color: #555;
-  padding: 0 4px;
+  text-align: center;
+  white-space: nowrap;
+  padding: 0 2px;
 }
 
 /* ── 빈 상태 ───────────────────────────────────────────── */
@@ -333,7 +363,23 @@ header {
   #news-list { grid-template-columns: repeat(2, 1fr); }
   .header-title { font-size: 1.5em; }
   .search-form button { padding: 0 24px; font-size: 0.95em; }
+
+  /* 태블릿 이상: 페이지네이션 원래 flex 스타일로 복귀 */
+  #pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  #pagination button {
+    width: auto;
+    min-width: 72px;
+    font-size: 0.85em;
+    padding: 0 14px;
+  }
 }
+
 @media (min-width: 960px) {
   #news-list { grid-template-columns: repeat(2, 1fr); max-width: 1000px; }
   .control-wrap { max-width: 1000px; }
