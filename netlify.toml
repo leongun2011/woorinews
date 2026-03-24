@@ -1,8 +1,30 @@
 [build]
   functions = "netlify/functions"
 
+# 전체 페이지
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Frame-Options = "DENY"
+    # X-Frame-Options 제거 → 카카오 인앱브라우저 iframe 차단 방지
     X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    # 카카오톡 인앱브라우저 호환을 위해 COEP/COOP 완화
+    Cross-Origin-Embedder-Policy = "unsafe-none"
+    Cross-Origin-Opener-Policy = "unsafe-none"
+
+# HTML 파일 캐시 방지 (항상 최신 버전)
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+# JS/CSS 캐시 (버전 변경 시 자동 갱신)
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
