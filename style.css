@@ -412,3 +412,94 @@ header {
   #pagination    { max-width: 1000px; }
   .progress-wrap { max-width: 1000px; }
 }
+
+/* ══════════════════════════════════════════════════════
+   PWA 설치 배너
+══════════════════════════════════════════════════════ */
+#pwa-banner {
+  position: fixed;
+  bottom: calc(16px + var(--safe-bot));
+  left: 50%;
+  transform: translateX(-50%) translateY(120px);
+  width: calc(100% - 32px);
+  max-width: 480px;
+  background: var(--navy);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.28);
+  z-index: 9990;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: auto;
+}
+#pwa-banner.show {
+  transform: translateX(-50%) translateY(0);
+}
+.pwa-banner-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 14px 14px 16px;
+}
+.pwa-banner-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+.pwa-banner-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.pwa-banner-text strong {
+  color: #fff;
+  font-size: 0.9em;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.pwa-banner-text span {
+  color: rgba(255,255,255,0.72);
+  font-size: 0.75em;
+  line-height: 1.4;
+}
+.pwa-banner-text b {
+  color: var(--gold);
+  font-weight: 700;
+}
+.pwa-banner-install {
+  flex-shrink: 0;
+  background: var(--gold);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 0.84em;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s;
+}
+.pwa-banner-install:active { opacity: 0.8; }
+.pwa-banner-close {
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.8);
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  font-size: 0.8em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s;
+}
+.pwa-banner-close:active { background: rgba(255,255,255,0.25); }
