@@ -373,22 +373,98 @@ function renderStars(score) {
   return '★'.repeat(s) + '☆'.repeat(5 - s);
 }
 
-// ── PWA 설치 프롬프트 ─────────────────────────────────────
+// ── PWA 설치 배너 ─────────────────────────────────────────
+const $installBtn = document.getElementById('install-btn');
 let deferredPrompt = null;
-const $installBtn  = document.getElementById('install-btn');
 
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredPrompt = e;
-  $installBtn.style.display = 'block';
-});
+// iOS 감지
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches
+  || window.navigator.standalone === true;
 
-$installBtn.addEventListener('click', async () => {
+// 이미 설치된 경우 배너 표시 안 함
+if (!isInStandaloneMode) {
+
+  if (isIOS) {
+    // iOS: beforeinstallprompt 없음 → 직접 안내 배너 표시
+    setTimeout(() => showInstallBanner('ios'), 1500);
+  }
+
+  // Android / Chrome: beforeinstallprompt 이벤트 대기
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    setTimeout(() => showInstallBanner('android'), 1500);
+  });
+}
+
+function showInstallBanner(type) {
+  const existing = document.getElementById('pwa-banner');
+  if (existing) return;
+
+  const banner = document.createElement('div');
+  banner.id = 'pwa-banner';
+
+  if (type === 'ios') {
+    banner.innerHTML = `
+      <div class="pwa-banner-inner">
+        <img src="icon-192.png" class="pwa-banner-icon" alt="앱 아이콘">
+        <div class="pwa-banner-text">
+          <strong>홈 화면에 추가하기</strong>
+          <span>Safari 하단 <b>공유 버튼(□↑)</b> → <b>홈 화면에 추가</b></span>
+        </div>
+        <button class="pwa-banner-close" onclick="closeBanner()">✕</button>
+      </div>
+    `;
+  } else {
+    banner.innerHTML = `
+      <div class="pwa-banner-inner">
+        <img src="icon-192.png" class="pwa-banner-icon" alt="앱 아이콘">
+        <div class="pwa-banner-text">
+          <strong>앱으로 설치하기</strong>
+          <span>홈 화면에 추가하면 앱처럼 사용할 수 있어요</span>
+        </div>
+        <button class="pwa-banner-install" onclick="triggerInstall()">설치</button>
+        <button class="pwa-banner-close" onclick="closeBanner()">✕</button>
+      </div>
+    `;
+  }
+
+  document.body.appendChild(banner);
+  requestAnimationFrame(() => banner.classList.add('show'));
+}
+
+function triggerInstall() {
   if (!deferredPrompt) return;
   deferredPrompt.prompt();
-  const { outcome } = await deferredPrompt.userChoice;
-  if (outcome === 'accepted') $installBtn.style.display = 'none';
-  deferredPrompt = null;
+  deferredPrompt.userChoice.then(({ outcome }) => {
+    if (outcome === 'accepted') closeBanner();
+    deferredPrompt = null;
+  });
+}
+
+function closeBanner() {
+  const banner = document.getElementById('pwa-banner');
+  if (!banner) return;
+  banner.classList.remove('show');
+  setTimeout(() => banner.remove(), 350);
+  // 하루 동안 다시 표시 안 함
+  try { localStorage.setItem('pwa-banner-closed', Date.now()); } catch(e) {}
+}
+
+// 하루 안에 닫은 경우 다시 표시 안 함
+try {
+  const closed = localStorage.getItem('pwa-banner-closed');
+  if (closed && Date.now() - parseInt(closed) < 86400000) {
+    // 배너 표시 함수 덮어쓰기
+    window.showInstallBanner = () => {};
+  }
+} catch(e) {}
+
+// 기존 헤더 설치 버튼 클릭 처리도 유지
+$installBtn && $installBtn.addEventListener('click', () => {
+  if (deferredPrompt) triggerInstall();
+  else if (isIOS) showInstallBanner('ios');
 });
 
 // ── 서비스 워커 등록 ──────────────────────────────────────
