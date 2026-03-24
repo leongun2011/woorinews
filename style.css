@@ -418,82 +418,95 @@ header {
 ══════════════════════════════════════════════════════ */
 #pwa-banner {
   position: fixed;
-  bottom: calc(16px + var(--safe-bot));
+  bottom: calc(20px + var(--safe-bot));
   left: 50%;
-  transform: translateX(-50%) translateY(120px);
+  transform: translateX(-50%) translateY(140px);
   width: calc(100% - 32px);
-  max-width: 480px;
-  background: var(--navy);
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.28);
+  max-width: 460px;
+  background: linear-gradient(135deg, #1a3a5c 0%, #1e4a78 100%);
+  border-radius: 18px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
   z-index: 9990;
-  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-  pointer-events: auto;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
 }
 #pwa-banner.show {
   transform: translateX(-50%) translateY(0);
 }
-.pwa-banner-inner {
+
+/* iOS 화살표 */
+.pwa-arrow {
+  text-align: center;
+  color: var(--gold);
+  font-size: 1.4em;
+  padding-bottom: 10px;
+  animation: bounce 1.2s ease infinite;
+}
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(5px); }
+}
+
+.pwa-inner {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px 14px 14px 16px;
+  padding: 16px;
 }
-.pwa-banner-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+.pwa-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 13px;
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  box-shadow: 0 3px 12px rgba(0,0,0,0.3);
 }
-.pwa-banner-text {
+.pwa-text {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
 }
-.pwa-banner-text strong {
+.pwa-text strong {
   color: #fff;
-  font-size: 0.9em;
+  font-size: 0.92em;
   font-weight: 700;
-  white-space: nowrap;
 }
-.pwa-banner-text span {
-  color: rgba(255,255,255,0.72);
+.pwa-text span {
+  color: rgba(255,255,255,0.7);
   font-size: 0.75em;
-  line-height: 1.4;
+  line-height: 1.5;
 }
-.pwa-banner-text b {
+.pwa-text b {
   color: var(--gold);
   font-weight: 700;
 }
-.pwa-banner-install {
+.pwa-ok {
   flex-shrink: 0;
   background: var(--gold);
   color: #fff;
   border: none;
   border-radius: 10px;
-  padding: 8px 14px;
-  font-size: 0.84em;
+  padding: 9px 16px;
+  font-size: 0.86em;
   font-weight: 700;
   font-family: inherit;
   cursor: pointer;
   white-space: nowrap;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
-  transition: opacity 0.15s;
+  transition: opacity 0.15s, transform 0.1s;
 }
-.pwa-banner-install:active { opacity: 0.8; }
-.pwa-banner-close {
+.pwa-ok:active { opacity: 0.8; transform: scale(0.96); }
+.pwa-x {
   flex-shrink: 0;
-  background: rgba(255,255,255,0.15);
-  color: rgba(255,255,255,0.8);
+  background: rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.75);
   border: none;
   border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  font-size: 0.8em;
+  width: 30px;
+  height: 30px;
+  font-size: 0.82em;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -502,4 +515,4 @@ header {
   -webkit-tap-highlight-color: transparent;
   transition: background 0.15s;
 }
-.pwa-banner-close:active { background: rgba(255,255,255,0.25); }
+.pwa-x:active { background: rgba(255,255,255,0.25); }
