@@ -251,7 +251,7 @@ async function startSearch() {
       showToast('검색 결과가 없습니다');
       $emptyState.style.display = 'block';
     } else {
-      $filterBar.style.display = 'flex';
+      $filterBar.style.display = 'block';
       applyFilter();
     }
   } catch {
