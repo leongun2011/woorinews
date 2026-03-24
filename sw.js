@@ -1,4 +1,4 @@
-const CACHE_VER = 'banking-news-v3';
+const CACHE_VER = 'banking-news-v4';
 const STATIC_ASSETS = [
   './index.html',
   './app.js',
@@ -28,7 +28,7 @@ self.addEventListener('fetch', e => {
   const url = e.request.url;
 
   // Netlify Functions / 외부 RSS → 항상 네트워크 (캐시 안 함)
-  if (url.includes('/api/rss') ||
+  if (url.includes('/.netlify/functions/') ||
       url.includes('google.com') ||
       url.includes('fonts.googleapis') ||
       url.includes('fonts.gstatic')) {
