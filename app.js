@@ -374,98 +374,111 @@ function renderStars(score) {
 }
 
 // ── PWA 설치 배너 ─────────────────────────────────────────
-const $installBtn = document.getElementById('install-btn');
-let deferredPrompt = null;
+(function () {
+  // ① localStorage 캐시 완전 무시 (항상 보여줌 - 필요시 복구 가능)
+  // ② iOS / Android / standalone 정밀 감지
+  const ua = navigator.userAgent || '';
+  const isIOS        = /iphone|ipad|ipod/i.test(ua);
+  const isAndroid    = /android/i.test(ua);
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+                    || window.navigator.standalone === true;
+  const isSafari     = /safari/i.test(ua) && !/chrome|crios|fxios/i.test(ua);
 
-// iOS 감지
-const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches
-  || window.navigator.standalone === true;
+  // 이미 앱으로 실행 중이면 표시 안 함
+  if (isStandalone) return;
 
-// 이미 설치된 경우 배너 표시 안 함
-if (!isInStandaloneMode) {
+  let deferredPrompt = null;
 
-  if (isIOS) {
-    // iOS: beforeinstallprompt 없음 → 직접 안내 배너 표시
-    setTimeout(() => showInstallBanner('ios'), 1500);
-  }
-
-  // Android / Chrome: beforeinstallprompt 이벤트 대기
+  // ── Android/Chrome: beforeinstallprompt 대기 ──────────
   window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault();
     deferredPrompt = e;
-    setTimeout(() => showInstallBanner('android'), 1500);
+    showBanner('android');
   });
-}
 
-function showInstallBanner(type) {
-  const existing = document.getElementById('pwa-banner');
-  if (existing) return;
-
-  const banner = document.createElement('div');
-  banner.id = 'pwa-banner';
-
-  if (type === 'ios') {
-    banner.innerHTML = `
-      <div class="pwa-banner-inner">
-        <img src="icon-192.png" class="pwa-banner-icon" alt="앱 아이콘">
-        <div class="pwa-banner-text">
-          <strong>홈 화면에 추가하기</strong>
-          <span>Safari 하단 <b>공유 버튼(□↑)</b> → <b>홈 화면에 추가</b></span>
-        </div>
-        <button class="pwa-banner-close" onclick="closeBanner()">✕</button>
-      </div>
-    `;
-  } else {
-    banner.innerHTML = `
-      <div class="pwa-banner-inner">
-        <img src="icon-192.png" class="pwa-banner-icon" alt="앱 아이콘">
-        <div class="pwa-banner-text">
-          <strong>앱으로 설치하기</strong>
-          <span>홈 화면에 추가하면 앱처럼 사용할 수 있어요</span>
-        </div>
-        <button class="pwa-banner-install" onclick="triggerInstall()">설치</button>
-        <button class="pwa-banner-close" onclick="closeBanner()">✕</button>
-      </div>
-    `;
+  // ── iOS Safari: 즉시 표시 ─────────────────────────────
+  if (isIOS && isSafari) {
+    setTimeout(() => showBanner('ios'), 800);
   }
 
-  document.body.appendChild(banner);
-  requestAnimationFrame(() => banner.classList.add('show'));
-}
-
-function triggerInstall() {
-  if (!deferredPrompt) return;
-  deferredPrompt.prompt();
-  deferredPrompt.userChoice.then(({ outcome }) => {
-    if (outcome === 'accepted') closeBanner();
-    deferredPrompt = null;
-  });
-}
-
-function closeBanner() {
-  const banner = document.getElementById('pwa-banner');
-  if (!banner) return;
-  banner.classList.remove('show');
-  setTimeout(() => banner.remove(), 350);
-  // 하루 동안 다시 표시 안 함
-  try { localStorage.setItem('pwa-banner-closed', Date.now()); } catch(e) {}
-}
-
-// 하루 안에 닫은 경우 다시 표시 안 함
-try {
-  const closed = localStorage.getItem('pwa-banner-closed');
-  if (closed && Date.now() - parseInt(closed) < 86400000) {
-    // 배너 표시 함수 덮어쓰기
-    window.showInstallBanner = () => {};
+  // ── iOS Chrome / 기타: 공유 안내 ─────────────────────
+  if (isIOS && !isSafari) {
+    setTimeout(() => showBanner('ios-chrome'), 800);
   }
-} catch(e) {}
 
-// 기존 헤더 설치 버튼 클릭 처리도 유지
-$installBtn && $installBtn.addEventListener('click', () => {
-  if (deferredPrompt) triggerInstall();
-  else if (isIOS) showInstallBanner('ios');
-});
+  // 헤더 설치 버튼 (Android용 fallback)
+  const $btn = document.getElementById('install-btn');
+  if ($btn) {
+    if (!isIOS) $btn.style.display = 'block'; // 항상 표시
+    $btn.addEventListener('click', () => {
+      if (deferredPrompt) { triggerInstall(); }
+      else if (isIOS)     { showBanner('ios'); }
+    });
+  }
+
+  // ─────────────────────────────────────────────────────
+  function showBanner(type) {
+    if (document.getElementById('pwa-banner')) return;
+
+    const banner = document.createElement('div');
+    banner.id = 'pwa-banner';
+
+    const iconHtml = `<img src="icon-192.png" class="pwa-icon" alt="">`;
+
+    if (type === 'android') {
+      banner.innerHTML = `
+        <div class="pwa-inner">
+          ${iconHtml}
+          <div class="pwa-text">
+            <strong>앱으로 설치</strong>
+            <span>홈 화면에 추가하면 앱처럼 빠르게 실행돼요</span>
+          </div>
+          <button class="pwa-ok" id="pwa-install-ok">설치</button>
+          <button class="pwa-x" id="pwa-close">✕</button>
+        </div>`;
+    } else if (type === 'ios') {
+      banner.innerHTML = `
+        <div class="pwa-inner">
+          ${iconHtml}
+          <div class="pwa-text">
+            <strong>홈 화면에 추가하기</strong>
+            <span>하단 <b>공유 버튼 □↑</b> 누른 뒤<br><b>홈 화면에 추가</b> 선택</span>
+          </div>
+          <button class="pwa-x" id="pwa-close">✕</button>
+        </div>
+        <div class="pwa-arrow">▼</div>`;
+    } else {
+      banner.innerHTML = `
+        <div class="pwa-inner">
+          ${iconHtml}
+          <div class="pwa-text">
+            <strong>홈 화면에 추가하기</strong>
+            <span>브라우저 메뉴 → <b>홈 화면에 추가</b></span>
+          </div>
+          <button class="pwa-x" id="pwa-close">✕</button>
+        </div>`;
+    }
+
+    document.body.appendChild(banner);
+    requestAnimationFrame(() => requestAnimationFrame(() => banner.classList.add('show')));
+
+    document.getElementById('pwa-close')?.addEventListener('click', () => {
+      banner.classList.remove('show');
+      setTimeout(() => banner.remove(), 350);
+    });
+    document.getElementById('pwa-install-ok')?.addEventListener('click', triggerInstall);
+  }
+
+  function triggerInstall() {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(({ outcome }) => {
+      const b = document.getElementById('pwa-banner');
+      if (b) { b.classList.remove('show'); setTimeout(() => b.remove(), 350); }
+      deferredPrompt = null;
+    });
+  }
+})();
 
 // ── 서비스 워커 등록 ──────────────────────────────────────
 if ('serviceWorker' in navigator) {
