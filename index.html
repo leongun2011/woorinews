@@ -36,18 +36,20 @@
     <button id="search-btn" onclick="startSearch()">뉴스 수집 시작</button>
   </div>
 
-  <!-- 필터 바 -->
+  <!-- 필터 바: onclick 제거 → app.js addEventListener만 사용 -->
   <div class="filter-bar" id="filter-bar" style="display:none;">
-    <span class="filter-label">중요도</span>
-    <div class="filter-scroll">
-      <button class="filter-btn active" data-score="0" onclick="setFilter(0)">전체</button>
-      <button class="filter-btn" data-score="5" onclick="toggleFilter(5)">★★★★★</button>
-      <button class="filter-btn" data-score="4" onclick="toggleFilter(4)">★★★★☆</button>
-      <button class="filter-btn" data-score="3" onclick="toggleFilter(3)">★★★☆☆</button>
-      <button class="filter-btn" data-score="2" onclick="toggleFilter(2)">★★☆☆☆</button>
-      <button class="filter-btn" data-score="1" onclick="toggleFilter(1)">★☆☆☆☆</button>
+    <div class="filter-top-row">
+      <span class="filter-label">중요도 필터</span>
+      <span class="filter-count" id="filter-count"></span>
     </div>
-    <span class="filter-count" id="filter-count"></span>
+    <div class="filter-scroll">
+      <button class="filter-btn active" data-score="0">전체</button>
+      <button class="filter-btn" data-score="5">★★★★★</button>
+      <button class="filter-btn" data-score="4">★★★★☆</button>
+      <button class="filter-btn" data-score="3">★★★☆☆</button>
+      <button class="filter-btn" data-score="2">★★☆☆☆</button>
+      <button class="filter-btn" data-score="1">★☆☆☆☆</button>
+    </div>
   </div>
 </div>
 
