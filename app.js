@@ -11,7 +11,7 @@ const MAX_WORKERS        = 5;
 const PAGE_SIZE          = 20;
 
 // ★ Netlify Functions 자체 프록시 (외부 프록시 불필요 → 빠르고 안정적)
-const RSS_ENDPOINT = '/.netlify/functions/rss?q=';
+const RSS_ENDPOINT = '/api/rss?q=';
 
 // iOS 15 이하 AbortSignal.timeout 폴리필
 function timeoutSignal(ms) {
@@ -380,97 +380,9 @@ function renderStars(score) {
   const isSafari     = /safari/i.test(ua) && !/crios|fxios|chrome/i.test(ua);
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches
                     || window.navigator.standalone === true;
-  const isKakao      = /KAKAOTALK/i.test(ua);
 
   // 이미 설치된 앱 모드면 표시 안 함
   if (isStandalone) return;
-
-  // ── 카카오 인앱브라우저 감지 ─────────────────────────────
-  if (isKakao) {
-    const currentUrl = location.href;
-    const banner = document.createElement('div');
-    banner.id = 'kakao-banner';
-    banner.style.cssText = `
-      position:fixed; bottom:0; left:0; right:0; z-index:99999;
-      background:linear-gradient(135deg,#1a3a5c,#1e4a78);
-      color:#fff; padding:16px;
-      box-shadow:0 -4px 20px rgba(0,0,0,0.3);
-      font-family:'Noto Sans KR',sans-serif;
-    `;
-
-    if (isIOS) {
-      // 아이폰: Safari로 열기 수동 안내
-      banner.innerHTML = `
-        <div style="display:flex;align-items:center;gap:12px;">
-          <img src="icon-192.png" style="width:44px;height:44px;border-radius:10px;flex-shrink:0;">
-          <div style="flex:1;min-width:0;">
-            <div style="font-weight:700;font-size:0.92em;margin-bottom:4px;">Safari에서 열어주세요</div>
-            <div style="font-size:0.76em;color:rgba(255,255,255,0.8);line-height:1.6;">
-              앱 설치는 Safari에서만 가능해요.<br>
-              우측 하단 <b style="color:#f39c12;">⋯ → Safari로 열기</b> 후<br>
-              하단 <b style="color:#f39c12;">공유 □↑ → 홈 화면에 추가</b>를 눌러주세요.
-            </div>
-          </div>
-          <button id="kakao-x" style="
-            flex-shrink:0;background:rgba(255,255,255,0.15);color:#fff;
-            border:none;border-radius:50%;width:30px;height:30px;
-            font-size:0.82em;cursor:pointer;align-self:flex-start;">✕</button>
-        </div>
-      `;
-      document.body.appendChild(banner);
-      document.getElementById('kakao-x').addEventListener('click', () => banner.remove());
-
-    } else {
-      // 안드로이드: Brave 먼저, 없으면 Chrome으로 열기 버튼
-      const braveIntent = 'intent://' + currentUrl.replace(/https?:\/\//, '')
-        + '#Intent;scheme=https;package=com.brave.browser;end';
-      const chromeIntent = 'intent://' + currentUrl.replace(/https?:\/\//, '')
-        + '#Intent;scheme=https;package=com.android.chrome;end';
-
-      function openBrave() {
-        location.href = braveIntent;
-        // Brave 없으면 1.5초 후 Chrome 시도
-        setTimeout(() => { location.href = chromeIntent; }, 1500);
-      }
-
-      banner.innerHTML = `
-        <div style="display:flex;align-items:center;gap:12px;">
-          <img src="icon-192.png" style="width:44px;height:44px;border-radius:10px;flex-shrink:0;">
-          <div style="flex:1;min-width:0;">
-            <div style="font-weight:700;font-size:0.92em;margin-bottom:4px;">브라우저에서 열기</div>
-            <div style="font-size:0.76em;color:rgba(255,255,255,0.8);line-height:1.5;">
-              앱 설치는 Chrome / Brave에서 가능해요.
-            </div>
-          </div>
-          <button id="kakao-x" style="
-            flex-shrink:0;background:rgba(255,255,255,0.15);color:#fff;
-            border:none;border-radius:50%;width:30px;height:30px;
-            font-size:0.82em;cursor:pointer;align-self:flex-start;">✕</button>
-        </div>
-        <div style="display:flex;gap:8px;margin-top:12px;">
-          <button id="open-brave" style="
-            flex:1;height:40px;background:#fb542b;color:#fff;
-            border:none;border-radius:8px;font-weight:700;font-size:0.84em;
-            font-family:inherit;cursor:pointer;">
-            🦁 Brave로 열기
-          </button>
-          <button id="open-chrome" style="
-            flex:1;height:40px;background:#4285f4;color:#fff;
-            border:none;border-radius:8px;font-weight:700;font-size:0.84em;
-            font-family:inherit;cursor:pointer;">
-            Chrome으로 열기
-          </button>
-        </div>
-      `;
-      document.body.appendChild(banner);
-      document.getElementById('kakao-x').addEventListener('click', () => banner.remove());
-      document.getElementById('open-brave').addEventListener('click', openBrave);
-      document.getElementById('open-chrome').addEventListener('click', () => {
-        location.href = chromeIntent;
-      });
-    }
-    return; // 카카오에선 PWA 배너 표시 안 함
-  }
 
   let deferredPrompt = null;
 
