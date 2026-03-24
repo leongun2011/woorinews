@@ -10,12 +10,8 @@ const RECENT_COMPARE     = 30;
 const MAX_WORKERS        = 5;
 const PAGE_SIZE          = 20;
 
-// CORS 프록시 목록 (순서대로 시도 → 빠른 응답 우선)
-const CORS_PROXIES = [
-  url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-  url => `https://thingproxy.freeboard.io/fetch/${url}`,
-];
+// ★ Netlify Functions 자체 프록시 (외부 프록시 불필요 → 빠르고 안정적)
+const RSS_ENDPOINT = '/.netlify/functions/rss?q=';
 
 // iOS 15 이하 AbortSignal.timeout 폴리필
 function timeoutSignal(ms) {
@@ -109,31 +105,25 @@ function deduplicate(list) {
 //  RSS 수집
 // ══════════════════════════════════════════════════════════
 async function fetchRSS(keyword) {
-  const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(keyword)}&hl=ko&gl=KR&ceid=KR:ko`;
-
-  // 프록시를 순서대로 시도 (첫 성공 시 반환)
-  for (const makeUrl of CORS_PROXIES) {
-    try {
-      const resp = await fetch(makeUrl(rssUrl), { signal: timeoutSignal(10000) });
-      if (!resp.ok) continue;
-      const text = await resp.text();
-      if (!text.includes('<item>')) continue;  // 빈 응답 감지
-      const xml  = new DOMParser().parseFromString(text, 'text/xml');
-      const items = Array.from(xml.querySelectorAll('item')).slice(0, MAX_RSS);
-      return items.map(item => {
-        const title = cleanText(item.querySelector('title')?.textContent || '');
-        return {
-          title,
-          link:  item.querySelector('link')?.textContent?.trim() || '#',
-          date:  parseDate(item.querySelector('pubDate')?.textContent),
-          score: keywordScore(title),
-        };
-      }).filter(n => n.title);
-    } catch {
-      // 다음 프록시로 폴백
-    }
+  try {
+    const url  = RSS_ENDPOINT + encodeURIComponent(keyword);
+    const resp = await fetch(url, { signal: timeoutSignal(15000) });
+    if (!resp.ok) return [];
+    const text = await resp.text();
+    const xml  = new DOMParser().parseFromString(text, 'text/xml');
+    const items = Array.from(xml.querySelectorAll('item')).slice(0, MAX_RSS);
+    return items.map(item => {
+      const title = cleanText(item.querySelector('title')?.textContent || '');
+      return {
+        title,
+        link:  item.querySelector('link')?.textContent?.trim() || '#',
+        date:  parseDate(item.querySelector('pubDate')?.textContent),
+        score: keywordScore(title),
+      };
+    }).filter(n => n.title);
+  } catch {
+    return [];
   }
-  return [];
 }
 
 async function collectNews(searchTerm, onProgress) {
@@ -141,7 +131,7 @@ async function collectNews(searchTerm, onProgress) {
   const results  = [];
   let   done     = 0;
 
-  // ★ 청크 없이 전체 병렬 수집 (Promise.allSettled로 일부 실패 무시)
+  // ★ 전체 동시 병렬 수집 (allSettled → 일부 실패해도 나머지 결과 사용)
   await Promise.allSettled(keywords.map(async kw => {
     const items = await fetchRSS(kw);
     results.push(...items);
