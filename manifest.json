@@ -3,7 +3,7 @@
   "short_name": "BankingNews",
   "description": "우리은행 글로벌전략부 금융 뉴스 모니터링",
   "start_url": "./index.html",
-  "display": "standalone",
+  "display": "browser",
   "background_color": "#f5f6fa",
   "theme_color": "#1a3a5c",
   "orientation": "portrait-primary",
