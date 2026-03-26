@@ -40,7 +40,9 @@
     <!-- 필터 바 (PC버전과 동일하게 6점~1점 전체 반영) -->
     <div class="filter-bar" id="filter-bar" style="display:none;">
       <div class="filter-row">
-        <span class="filter-label">중요도</span>
+        <span class="filter-label">중요도
+          <button class="score-info-btn" id="score-info-btn" aria-label="중요도 설명">ⓘ</button>
+        </span>
         <div class="filter-scroll">
           <button class="filter-btn active" data-score="0">전체</button>
           <button class="filter-btn" data-score="6">★★★★★★</button>
@@ -76,6 +78,24 @@
   <div class="empty-icon">📰</div>
   <div class="empty-title">뉴스를 수집해보세요</div>
   <div class="empty-desc">검색어를 입력하거나 버튼을 눌러<br>금융 뉴스를 수집합니다</div>
+</div>
+
+<!-- 중요도 설명 팝업 -->
+<div id="score-info-overlay" class="score-info-overlay" style="display:none;">
+  <div class="score-info-modal">
+    <div class="score-info-header">
+      <span>중요도 기준 안내</span>
+      <button id="score-info-close" class="score-info-close">✕</button>
+    </div>
+    <ul class="score-info-list">
+      <li><span class="si-stars">★★★★★★</span><div><strong>금융감독 · 제재 · 사고</strong><p>금융감독원 검사, 제재심의, 금융사고, 내부통제, 횡령사고 등</p></div></li>
+      <li><span class="si-stars">★★★★★</span><div><strong>위기 · 수사 · 보안</strong><p>파산, 뱅크런, 금융위기, 검찰수사, 해킹, 개인정보 유출 등</p></div></li>
+      <li><span class="si-stars">★★★★☆</span><div><strong>실적 · 시장 · 규제</strong><p>인수합병, 실적발표, 금리·환율·주가, 규제·법안 시행 등</p></div></li>
+      <li><span class="si-stars">★★★☆☆</span><div><strong>협력 · 혁신 · 출시</strong><p>MOU, 투자, 핀테크, AI, 블록체인, 신규 서비스 출시 등</p></div></li>
+      <li><span class="si-stars">★★☆☆☆</span><div><strong>인사 · 행사</strong><p>임원 인사, 채용, 세미나, 포럼, 캠페인, 기부 등</p></div></li>
+      <li><span class="si-stars">★☆☆☆☆</span><div><strong>일반</strong><p>위 기준에 해당하지 않는 일반 금융 뉴스</p></div></li>
+    </ul>
+  </div>
 </div>
 
 <!-- 토스트 -->
