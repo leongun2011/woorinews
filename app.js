@@ -517,14 +517,26 @@ function renderStars(score) {
 
     const okBtn = document.getElementById('pwa-ok');
     if (okBtn) {
-      okBtn.addEventListener('click', () => {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(() => {
+      okBtn.addEventListener('click', async () => {
+        if (!deferredPrompt) {
+          // deferredPrompt 없으면 버튼 텍스트로 안내 후 배너 닫기
+          okBtn.textContent = '브라우저 메뉴에서 설치해주세요';
+          okBtn.style.fontSize = '0.72em';
+          setTimeout(() => {
+            b.classList.remove('show');
+            setTimeout(() => b.remove(), 400);
+          }, 2000);
+          return;
+        }
+        try {
+          await deferredPrompt.prompt();
+          const choice = await deferredPrompt.userChoice;
           b.classList.remove('show');
           setTimeout(() => b.remove(), 400);
           deferredPrompt = null;
-        });
+        } catch (err) {
+          console.warn('PWA install prompt error:', err);
+        }
       });
     }
   }
@@ -600,10 +612,23 @@ function renderStars(score) {
   const $btn = document.getElementById('install-btn');
   if ($btn) {
     if (!isIOS || isSafari) $btn.style.display = 'block';
-    $btn.addEventListener('click', () => {
-      if (deferredPrompt) deferredPrompt.prompt();
-      else if (isIOS && isSafari) buildBanner('ios');
-      else if (!isIOS) buildBanner('android');
+    $btn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        // beforeinstallprompt 받아둔 경우 → 즉시 시스템 설치 다이얼로그
+        try {
+          await deferredPrompt.prompt();
+          await deferredPrompt.userChoice;
+          deferredPrompt = null;
+        } catch (err) {
+          console.warn('PWA install error:', err);
+        }
+      } else if (isIOS && isSafari) {
+        buildBanner('ios');
+      } else if (!isIOS) {
+        // deferredPrompt 없으면 배너로 안내
+        buildBanner('android');
+        attachSnoozeToX();
+      }
     });
   }
 })();
