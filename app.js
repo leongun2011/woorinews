@@ -3,7 +3,7 @@
 // ══════════════════════════════════════════════════════════
 //  설정 (bank_news_scraper.py 동일)
 // ══════════════════════════════════════════════════════════
-const DEFAULT_KEYWORDS   = ["금융","은행","핀테크","디지털금융","글로벌금융","연준","국제금융","금융감독원"];
+const DEFAULT_KEYWORDS   = ["금융","은행","핀테크","디지털금융","글로벌금융","연준","국제금융"];
 const MAX_RSS            = 300;
 const SIMILARITY_THRESH  = 0.6;
 const RECENT_COMPARE     = 30;
@@ -25,11 +25,6 @@ function timeoutSignal(ms) {
 //  키워드 중요도 (bank_news_scraper.py 동일)
 // ══════════════════════════════════════════════════════════
 const SCORE_KEYWORDS = {
-  6: ["검사","현장검사","종합검사","부문검사","특별검사","정기검사",
-      "금융감독원","금감원","검사결과","검사착수","감독당국",
-      "제재심의","조치","경영실태평가","적기시정조치",
-      "은행제재","은행 제재","금융제재","제재조치",
-      "금융사고","은행사고","내부통제","횡령사고","금융범죄"],
   5: ["파산","부도","파탄","뱅크런","금융위기","영업정지","영업취소",
       "기준금리","금리인상","금리인하","긴급조치","긴급",
       "제재","제재금","과징금","검찰","수사","구속","기소",
@@ -49,7 +44,7 @@ const SCORE_KEYWORDS = {
 };
 
 function keywordScore(title) {
-  for (const score of [6,5,4,3,2]) {
+  for (const score of [5,4,3,2]) {
     for (const kw of SCORE_KEYWORDS[score]) {
       if (title.includes(kw)) return score;
     }
@@ -374,8 +369,7 @@ function escapeHTML(str) {
 
 function renderStars(score) {
   if (!score || score < 1) return '';
-  const s = Math.min(6, Math.max(1, parseInt(score)));
-  if (s === 6) return '★★★★★★';
+  const s = Math.min(5, Math.max(1, parseInt(score)));
   return '★'.repeat(s) + '☆'.repeat(5 - s);
 }
 
@@ -389,6 +383,8 @@ function renderStars(score) {
   // 카카오 인앱브라우저 감지 (다양한 UA 패턴 대응)
   const isKakao      = /kakaotalk|kakaobrowser/i.test(ua)
                     || ua.toLowerCase().includes('kakao');
+  // Brave 브라우저 감지 (navigator.brave API 우선, UA 폴백)
+  const isBrave      = !!(navigator.brave) || /brave/i.test(ua);
 
   // 이미 설치된 앱 모드면 표시 안 함
   if (isStandalone) return;
@@ -434,12 +430,17 @@ function renderStars(score) {
         setTimeout(() => { location.href = chromeIntent; }, 1500);
       }
 
+      // ★ 페이지 로드 즉시 Brave 자동 실행 시도 (Brave 미설치 시 아무 일도 안 일어남)
+      setTimeout(() => { location.href = braveIntent; }, 300);
+
       banner.innerHTML = `
         <div style="display:flex;align-items:center;gap:12px;">
           <img src="icon-192.png" style="width:44px;height:44px;border-radius:10px;flex-shrink:0;">
           <div style="flex:1;min-width:0;">
             <div style="font-weight:700;font-size:0.92em;margin-bottom:4px;">브라우저에서 열기</div>
-            <div style="font-size:0.76em;color:rgba(255,255,255,0.8);line-height:1.5;">앱 설치는 Chrome / Brave에서 가능해요.</div>
+            <div style="font-size:0.76em;color:rgba(255,255,255,0.8);line-height:1.5;">
+              Brave가 설치돼 있으면 자동으로 열립니다.<br>아래 버튼으로 직접 선택할 수도 있어요.
+            </div>
           </div>
           <button id="kakao-x" style="flex-shrink:0;background:rgba(255,255,255,0.15);color:#fff;
             border:none;border-radius:50%;width:30px;height:30px;font-size:0.82em;
@@ -525,11 +526,18 @@ function renderStars(score) {
   }
 
   // Android/Chrome → beforeinstallprompt 대기
+  // ★ Brave가 감지되면 PWA 설치 프롬프트를 Brave 우선으로 처리
   window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault();
     deferredPrompt = e;
     buildBanner('android');
   });
+
+  // ★ Brave 브라우저에서 직접 접속한 경우 → 헤더 설치버튼 즉시 노출
+  if (isBrave) {
+    const $btn = document.getElementById('install-btn');
+    if ($btn) $btn.style.display = 'block';
+  }
 
   // iOS → 무조건 표시 (beforeinstallprompt 없음)
   if (isIOS) {
