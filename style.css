@@ -444,3 +444,126 @@ header {
   transition: background 0.15s;
 }
 .pwa-x:active { background: rgba(255,255,255,0.25); }
+/* ── ⓘ 중요도 설명 버튼 ─────────────────────────────────── */
+.score-info-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-left: 4px;
+  background: none;
+  border: 1.5px solid #aaa;
+  border-radius: 50%;
+  color: #888;
+  font-size: 0.65em;
+  font-weight: 700;
+  cursor: pointer;
+  vertical-align: middle;
+  line-height: 1;
+  padding: 0;
+  transition: border-color 0.15s, color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.score-info-btn:active,
+.score-info-btn:hover {
+  border-color: var(--blue-l);
+  color: var(--blue-l);
+}
+
+/* ── 오버레이 배경 ────────────────────────────────────────── */
+.score-info-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 99998;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  animation: fadeInOverlay 0.2s ease;
+}
+@keyframes fadeInOverlay {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── 팝업 모달 ───────────────────────────────────────────── */
+.score-info-modal {
+  background: #fff;
+  border-radius: 18px 18px 0 0;
+  width: 100%;
+  max-width: 700px;
+  padding: 0 0 24px;
+  animation: slideUpModal 0.25s cubic-bezier(0.34,1.2,0.64,1);
+}
+@keyframes slideUpModal {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+.score-info-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid #eee;
+  font-weight: 700;
+  font-size: 0.95em;
+  color: var(--navy);
+}
+.score-info-close {
+  background: #f0f2f5;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  font-size: 0.8em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #555;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* ── 설명 목록 ───────────────────────────────────────────── */
+.score-info-list {
+  list-style: none;
+  padding: 8px 20px 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.score-info-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+.score-info-list li:last-child { border-bottom: none; }
+.si-stars {
+  flex-shrink: 0;
+  font-size: 0.78em;
+  color: var(--gold);
+  letter-spacing: 1px;
+  min-width: 80px;
+  padding-top: 2px;
+}
+.score-info-list li div strong {
+  display: block;
+  font-size: 0.88em;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 2px;
+}
+.score-info-list li div p {
+  font-size: 0.76em;
+  color: var(--sub);
+  line-height: 1.5;
+  margin: 0;
+}
