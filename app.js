@@ -204,6 +204,30 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
   });
 });
 
+// ── ⓘ 중요도 설명 팝업 ─────────────────────────────────
+(function () {
+  const overlay   = document.getElementById('score-info-overlay');
+  const openBtn   = document.getElementById('score-info-btn');
+  const closeBtn  = document.getElementById('score-info-close');
+  if (!overlay || !openBtn) return;
+
+  function openPopup() {
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+  function closePopup() {
+    overlay.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  openBtn.addEventListener('click', e => { e.stopPropagation(); openPopup(); });
+  closeBtn.addEventListener('click', closePopup);
+  // 배경 탭하면 닫기
+  overlay.addEventListener('click', e => { if (e.target === overlay) closePopup(); });
+  // ESC 키
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closePopup(); });
+})();
+
 function showToast(msg) {
   $toast.textContent = msg;
   $toast.classList.add('show');
