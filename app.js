@@ -205,28 +205,26 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
 });
 
 // ── ⓘ 중요도 설명 팝업 ─────────────────────────────────
-(function () {
-  const overlay   = document.getElementById('score-info-overlay');
-  const openBtn   = document.getElementById('score-info-btn');
-  const closeBtn  = document.getElementById('score-info-close');
-  if (!overlay || !openBtn) return;
+function openScoreInfoPopup() {
+  const overlay = document.getElementById('score-info-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeScoreInfoPopup() {
+  const overlay = document.getElementById('score-info-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'none';
+  document.body.style.overflow = '';
+}
 
-  function openPopup() {
-    overlay.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-  }
-  function closePopup() {
-    overlay.style.display = 'none';
-    document.body.style.overflow = '';
-  }
-
-  openBtn.addEventListener('click', e => { e.stopPropagation(); openPopup(); });
-  closeBtn.addEventListener('click', closePopup);
-  // 배경 탭하면 닫기
-  overlay.addEventListener('click', e => { if (e.target === overlay) closePopup(); });
-  // ESC 키
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closePopup(); });
-})();
+// 이벤트 위임 방식 — filter-bar가 나중에 표시돼도 항상 동작
+document.addEventListener('click', function(e) {
+  if (e.target.closest('#score-info-btn'))    { e.stopPropagation(); openScoreInfoPopup(); return; }
+  if (e.target.closest('#score-info-close'))  { closeScoreInfoPopup(); return; }
+  if (e.target.id === 'score-info-overlay')   { closeScoreInfoPopup(); return; }
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeScoreInfoPopup(); });
 
 function showToast(msg) {
   $toast.textContent = msg;
