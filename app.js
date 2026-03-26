@@ -480,14 +480,24 @@ function renderStars(score) {
 
     if (type === 'android') {
       b.innerHTML = `
-        <div class="pwa-inner">
-          <img src="icon-192.png" class="pwa-icon" alt="">
-          <div class="pwa-text">
-            <strong>앱으로 설치하기</strong>
-            <span>홈 화면에 추가하면 앱처럼 빠르게 실행돼요</span>
+        <div class="pwa-inner" style="flex-direction:column;align-items:stretch;gap:10px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <img src="icon-192.png" class="pwa-icon" alt="">
+            <div class="pwa-text">
+              <strong>앱 설치 — 브라우저를 선택해주세요</strong>
+              <span>앱스 서랍에 바로가기가 생성됩니다</span>
+            </div>
+            <button class="pwa-x" id="pwa-x" style="flex-shrink:0;">✕</button>
           </div>
-          <button class="pwa-ok" id="pwa-ok">설치</button>
-          <button class="pwa-x" id="pwa-x">✕</button>
+          <div style="display:flex;gap:8px;">
+            <button id="pwa-brave" style="flex:1;height:42px;background:#fb542b;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:0.88em;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+              🦁 Brave로 설치
+            </button>
+            <button id="pwa-chrome" style="flex:1;height:42px;background:#4285f4;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:0.88em;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+              Chrome으로 설치
+            </button>
+          </div>
         </div>`;
     } else {
       // iOS (Safari & Chrome 모두)
@@ -515,30 +525,35 @@ function renderStars(score) {
       setTimeout(() => b.remove(), 400);
     });
 
-    const okBtn = document.getElementById('pwa-ok');
-    if (okBtn) {
-      okBtn.addEventListener('click', async () => {
-        if (!deferredPrompt) {
-          // deferredPrompt 없으면 버튼 텍스트로 안내 후 배너 닫기
-          okBtn.textContent = '브라우저 메뉴에서 설치해주세요';
-          okBtn.style.fontSize = '0.72em';
-          setTimeout(() => {
-            b.classList.remove('show');
-            setTimeout(() => b.remove(), 400);
-          }, 2000);
-          return;
+    // ── Brave / Chrome 선택 버튼 이벤트 ──────────────────
+    async function doInstall(preferBrave) {
+      if (!deferredPrompt) {
+        // deferredPrompt 없음 → 해당 브라우저로 페이지 열어서 설치 유도
+        const currentUrl = location.href;
+        if (preferBrave) {
+          location.href = 'intent://' + currentUrl.replace(/https?:\/\//, '') +
+            '#Intent;scheme=https;package=com.brave.browser;end';
+        } else {
+          location.href = 'intent://' + currentUrl.replace(/https?:\/\//, '') +
+            '#Intent;scheme=https;package=com.android.chrome;end';
         }
-        try {
-          await deferredPrompt.prompt();
-          const choice = await deferredPrompt.userChoice;
-          b.classList.remove('show');
-          setTimeout(() => b.remove(), 400);
-          deferredPrompt = null;
-        } catch (err) {
-          console.warn('PWA install prompt error:', err);
-        }
-      });
+        return;
+      }
+      try {
+        await deferredPrompt.prompt();
+        await deferredPrompt.userChoice;
+        b.classList.remove('show');
+        setTimeout(() => b.remove(), 400);
+        deferredPrompt = null;
+      } catch (err) {
+        console.warn('PWA install prompt error:', err);
+      }
     }
+
+    const braveBtn  = document.getElementById('pwa-brave');
+    const chromeBtn = document.getElementById('pwa-chrome');
+    if (braveBtn)  braveBtn.addEventListener('click',  () => doInstall(true));
+    if (chromeBtn) chromeBtn.addEventListener('click', () => doInstall(false));
   }
 
   // ── 24시간 스누즈 공통 유틸 ────────────────────────────
