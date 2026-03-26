@@ -218,13 +218,33 @@ function closeScoreInfoPopup() {
   document.body.style.overflow = '';
 }
 
-// 이벤트 위임 방식 — filter-bar가 나중에 표시돼도 항상 동작
-document.addEventListener('click', function(e) {
-  if (e.target.closest('#score-info-btn'))    { e.stopPropagation(); openScoreInfoPopup(); return; }
-  if (e.target.closest('#score-info-close'))  { closeScoreInfoPopup(); return; }
-  if (e.target.id === 'score-info-overlay')   { closeScoreInfoPopup(); return; }
-});
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeScoreInfoPopup(); });
+// ★ iOS Safari는 button에 click 버블링이 안 됨 → 직접 바인딩
+// filter-bar가 나중에 나타나므로 MutationObserver로 버튼 생성 감지
+(function bindScoreInfoEvents() {
+  function attachBtn() {
+    const btn     = document.getElementById('score-info-btn');
+    const closeBtn = document.getElementById('score-info-close');
+    const overlay  = document.getElementById('score-info-overlay');
+    if (!btn || btn._scoreBound) return;
+    btn._scoreBound = true;
+
+    // ★ iOS 대응: cursor:pointer + onclick 직접 할당
+    btn.style.cursor = 'pointer';
+    btn.onclick = function(e) { e.stopPropagation(); openScoreInfoPopup(); };
+
+    if (closeBtn) closeBtn.onclick = closeScoreInfoPopup;
+    if (overlay)  overlay.onclick  = function(e) { if (e.target === overlay) closeScoreInfoPopup(); };
+  }
+
+  // 즉시 시도 (이미 DOM에 있으면 바로 바인딩)
+  attachBtn();
+
+  // filter-bar가 display:none→block 될 때를 감지
+  const observer = new MutationObserver(attachBtn);
+  observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeScoreInfoPopup(); });
+})();
 
 function showToast(msg) {
   $toast.textContent = msg;
