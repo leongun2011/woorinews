@@ -527,10 +527,28 @@ function renderStars(score) {
 
   // Android/Chrome → beforeinstallprompt 대기
   // ★ Brave가 감지되면 PWA 설치 프롬프트를 Brave 우선으로 처리
+  const ANDROID_BANNER_KEY    = 'pwa_banner_closed';
+  const ANDROID_BANNER_EXPIRE = 24 * 60 * 60 * 1000;
+  function isAndroidBannerSnoozed() {
+    try {
+      const ts = localStorage.getItem(ANDROID_BANNER_KEY);
+      return ts && (Date.now() - parseInt(ts)) < ANDROID_BANNER_EXPIRE;
+    } catch { return false; }
+  }
+  function snoozeAndroidBanner() {
+    try { localStorage.setItem(ANDROID_BANNER_KEY, Date.now()); } catch {}
+  }
+
   window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault();
     deferredPrompt = e;
+    if (isAndroidBannerSnoozed()) return;   // ★ 24시간 내 닫은 경우 표시 안 함
     buildBanner('android');
+    // ✕ 닫으면 24시간 스누즈
+    setTimeout(() => {
+      const xBtn = document.getElementById('pwa-x');
+      if (xBtn) xBtn.addEventListener('click', snoozeAndroidBanner, { once: true });
+    }, 100);
   });
 
   // ★ Brave 브라우저에서 직접 접속한 경우 → 헤더 설치버튼 즉시 노출
@@ -539,18 +557,88 @@ function renderStars(score) {
     if ($btn) $btn.style.display = 'block';
   }
 
-  // iOS → 무조건 표시 (beforeinstallprompt 없음)
+  // iOS → Safari 여부에 따라 분기
   if (isIOS) {
-    setTimeout(() => buildBanner('ios'), 800);
+    const BANNER_KEY     = 'pwa_banner_closed';
+    const BANNER_EXPIRE  = 24 * 60 * 60 * 1000; // 24시간
+
+    function isBannerSnoozed() {
+      try {
+        const ts = localStorage.getItem(BANNER_KEY);
+        return ts && (Date.now() - parseInt(ts)) < BANNER_EXPIRE;
+      } catch { return false; }
+    }
+    function snoozeBanner() {
+      try { localStorage.setItem(BANNER_KEY, Date.now()); } catch {}
+    }
+
+    // buildBanner를 닫을 때 snooze 처리하도록 래핑
+    const _origBuildBanner = buildBanner;
+    function buildBannerWithSnooze(type) {
+      _origBuildBanner(type);
+      // ✕ 버튼에 snooze 추가
+      setTimeout(() => {
+        const xBtn = document.getElementById('pwa-x');
+        if (xBtn) {
+          xBtn.addEventListener('click', snoozeBanner, { once: true });
+        }
+      }, 100);
+    }
+
+    if (!isSafari) {
+      // ★ Safari 아닌 iOS 브라우저 → "Safari에서 열어야 합니다" 안내 배너
+      if (!isBannerSnoozed()) {
+        setTimeout(() => {
+          const b = document.createElement('div');
+          b.id = 'ios-safari-banner';
+          b.style.cssText = `
+            position:fixed; bottom:0; left:0; right:0; z-index:99999;
+            background:linear-gradient(135deg,#1a3a5c,#1e4a78);
+            color:#fff; padding:16px;
+            box-shadow:0 -4px 20px rgba(0,0,0,0.3);
+            font-family:'Noto Sans KR',sans-serif;
+            transition: transform 0.3s ease;
+          `;
+          b.innerHTML = `
+            <div style="display:flex;align-items:center;gap:12px;">
+              <img src="icon-192.png" style="width:44px;height:44px;border-radius:10px;flex-shrink:0;">
+              <div style="flex:1;min-width:0;">
+                <div style="font-weight:700;font-size:0.92em;margin-bottom:4px;">📱 홈 화면 추가는 Safari에서만 가능해요</div>
+                <div style="font-size:0.76em;color:rgba(255,255,255,0.8);line-height:1.6;">
+                  지금 브라우저에서는 홈 화면에 추가할 수 없어요.<br>
+                  <b style="color:#f39c12;">Safari</b>로 열어주세요.<br>
+                  하단 <b style="color:#f39c12;">공유 □↑ → 홈 화면에 추가</b>를 눌러주세요.
+                </div>
+              </div>
+              <button id="ios-safari-x" style="flex-shrink:0;background:rgba(255,255,255,0.15);color:#fff;
+                border:none;border-radius:50%;width:30px;height:30px;font-size:0.82em;
+                cursor:pointer;align-self:flex-start;">✕</button>
+            </div>
+          `;
+          document.body.appendChild(b);
+          document.getElementById('ios-safari-x').addEventListener('click', () => {
+            snoozeBanner();
+            b.remove();
+          });
+        }, 800);
+      }
+    } else {
+      // ★ Safari → 24시간 스누즈 적용한 PWA 배너
+      if (!isBannerSnoozed()) {
+        setTimeout(() => buildBannerWithSnooze('ios'), 800);
+      }
+    }
   }
 
   // 헤더 설치 버튼
   const $btn = document.getElementById('install-btn');
   if ($btn) {
-    $btn.style.display = 'block';
+    // iOS Safari가 아니면 버튼 숨김 (눌러도 PWA 설치 안 되므로)
+    if (!isIOS || isSafari) $btn.style.display = 'block';
     $btn.addEventListener('click', () => {
       if (deferredPrompt) deferredPrompt.prompt();
-      else buildBanner(isIOS ? 'ios' : 'android');
+      else if (isIOS && isSafari) buildBanner('ios');
+      else if (!isIOS) buildBanner('android');
     });
   }
 })();
