@@ -26,7 +26,7 @@ body {
 }
 
 /* ══════════════════════════════════════════════════════
-   스크롤 고정 영역 (헤더 + 검색 + 필터 전체 묶음)
+   스크롤 고정 영역
 ══════════════════════════════════════════════════════ */
 .sticky-controls {
   position: sticky;
@@ -57,16 +57,16 @@ header {
 }
 .header-title {
   font-family: 'Playfair Display', 'Georgia', serif;
-  font-size: clamp(0.72em, 4.2vw, 1.05em); /* ★ 모바일 작은 화면에서 자동 축소 */
   font-weight: 700;
+  font-size: clamp(0.72em, 4.2vw, 1.05em);
   background: linear-gradient(135deg, #1a3a5c 0%, #2980b9 60%, #1a3a5c 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   flex: 1;
+  min-width: 0;
   white-space: nowrap;
-  overflow: visible;        /* ★ hidden → visible 로 변경 */
-  min-width: 0;             /* ★ flex 자식 텍스트 잘림 방지 */
+  overflow: visible;
 }
 .install-btn {
   flex-shrink: 0;
@@ -84,7 +84,6 @@ header {
 .control-wrap {
   background: var(--card);
   padding: 10px 16px;
-  max-width: 100%;
 }
 
 /* ── 검색 폼 ────────────────────────────────────────────── */
@@ -128,21 +127,19 @@ header {
   -webkit-tap-highlight-color: transparent;
   transition: background 0.15s;
 }
-.search-form button:active { background: var(--blue); }
+.search-form button:active  { background: var(--blue); }
 .search-form button:disabled { background: #a0c4e0; cursor: not-allowed; }
 
 /* ── 필터 바 ─────────────────────────────────────────────
-   JS 가 inline style="display:none / display:flex" 를 주입하므로
-   내부 레이아웃은 .filter-row 에서 처리
+   PC 기준 7개 버튼: 전체 + ★x6 ~ ★x1
+   모바일: filter-scroll 가로 스크롤
 ─────────────────────────────────────────────────────── */
 .filter-bar {
   max-width: 700px;
   margin: 0 auto;
-  /* JS 가 flex 주입해도 내부는 .filter-row 가 담당 */
   align-items: stretch;
 }
 
-/* 한 줄: [중요도 라벨] [버튼들 스크롤] [N건] */
 .filter-row {
   display: flex;
   align-items: center;
@@ -155,38 +152,33 @@ header {
   font-size: 0.75em;
   font-weight: 700;
   color: #888;
-  white-space: nowrap;       /* ★ 줄바꿈 금지 → 세로 깨짐 방지 */
+  white-space: nowrap;
   line-height: 1;
 }
 
-/* 별점 버튼 가로 스크롤 영역 */
 .filter-scroll {
   flex: 1;
   display: flex;
-  gap: 5px;
+  gap: 4px;
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
-  /* 양쪽 페이드 효과로 스크롤 암시 */
-  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 8px, #000 calc(100% - 8px), transparent 100%);
-  mask-image: linear-gradient(to right, transparent 0, #000 8px, #000 calc(100% - 8px), transparent 100%);
+  /* mask 제거 → 마지막 버튼 잘림 방지 */
 }
 .filter-scroll::-webkit-scrollbar { display: none; }
 
-/* 필터 버튼 — 시각적으로 작게, 터치는 여유있게 */
 .filter-btn {
   flex-shrink: 0;
-  height: 30px;
-  padding: 0 10px;
+  height: 28px;
+  padding: 0 7px;
   border: 1.5px solid var(--border);
-  border-radius: 15px;
+  border-radius: 14px;
   background: var(--card);
   color: #555;
-  font-size: 0.78em;
+  font-size: 0.72em;
   font-family: inherit;
   cursor: pointer;
   white-space: nowrap;
-  /* 터치 즉시 반응 (300ms 지연 제거) */
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
@@ -203,7 +195,6 @@ header {
   opacity: 0.8;
 }
 
-/* 건수 */
 .filter-count {
   flex-shrink: 0;
   font-size: 0.75em;
@@ -241,7 +232,7 @@ header {
   transition: width 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 @keyframes rainbowFlow {
-  0%   { background-position: 0% 0; }
+  0%   { background-position: 0%   0; }
   100% { background-position: 400% 0; }
 }
 #progress-pct {
@@ -295,10 +286,7 @@ header {
 .news-meta  { font-size: 0.75em; color: var(--sub); margin-top: 2px; }
 .no-result  { text-align: center; color: #aaa; margin-top: 60px; font-size: 0.95em; }
 
-/* ── 페이지네이션 ─────────────────────────────────────────
-   5열 grid: [맨앞] [이전] [1/N] [다음] [맨뒤]
-   모바일 터치 최적화
-─────────────────────────────────────────────────────── */
+/* ── 페이지네이션 ────────────────────────────────────────── */
 #pagination {
   max-width: 700px;
   margin: 20px auto 48px;
@@ -311,7 +299,7 @@ header {
 #pagination button {
   width: 100%;
   min-height: 44px;
-  padding: 4px 4px;
+  padding: 4px;
   background: var(--blue-l);
   color: #fff;
   border: none;
@@ -325,7 +313,6 @@ header {
   display: flex;
   align-items: center;
   justify-content: center;
-  text-align: center;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
@@ -349,10 +336,7 @@ header {
 }
 
 /* ── 빈 상태 ───────────────────────────────────────────── */
-.empty-state {
-  text-align: center;
-  padding: 60px 32px;
-}
+.empty-state { text-align: center; padding: 60px 32px; }
 .empty-icon  { font-size: 3em; margin-bottom: 16px; }
 .empty-title { font-size: 1em; font-weight: 700; margin-bottom: 8px; }
 .empty-desc  { font-size: 0.85em; color: var(--sub); line-height: 1.7; }
@@ -389,7 +373,6 @@ header {
   #news-list { grid-template-columns: repeat(2, 1fr); }
   .header-title { font-size: 1.3em; }
   .search-form button { padding: 0 20px; font-size: 0.92em; }
-
   #pagination {
     display: flex;
     justify-content: center;
@@ -430,89 +413,34 @@ header {
   transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   overflow: hidden;
 }
-#pwa-banner.show {
-  transform: translateX(-50%) translateY(0);
-}
-
-/* iOS 화살표 */
+#pwa-banner.show { transform: translateX(-50%) translateY(0); }
 .pwa-arrow {
-  text-align: center;
-  color: var(--gold);
-  font-size: 1.4em;
-  padding-bottom: 10px;
-  animation: bounce 1.2s ease infinite;
+  text-align: center; color: var(--gold); font-size: 1.4em;
+  padding-bottom: 10px; animation: bounce 1.2s ease infinite;
 }
 @keyframes bounce {
   0%, 100% { transform: translateY(0); }
   50%       { transform: translateY(5px); }
 }
-
-.pwa-inner {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-}
-.pwa-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 13px;
-  flex-shrink: 0;
-  box-shadow: 0 3px 12px rgba(0,0,0,0.3);
-}
-.pwa-text {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.pwa-text strong {
-  color: #fff;
-  font-size: 0.92em;
-  font-weight: 700;
-}
-.pwa-text span {
-  color: rgba(255,255,255,0.7);
-  font-size: 0.75em;
-  line-height: 1.5;
-}
-.pwa-text b {
-  color: var(--gold);
-  font-weight: 700;
-}
+.pwa-inner { display: flex; align-items: center; gap: 12px; padding: 16px; }
+.pwa-icon  { width: 52px; height: 52px; border-radius: 13px; flex-shrink: 0; box-shadow: 0 3px 12px rgba(0,0,0,0.3); }
+.pwa-text  { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.pwa-text strong { color: #fff; font-size: 0.92em; font-weight: 700; }
+.pwa-text span   { color: rgba(255,255,255,0.7); font-size: 0.75em; line-height: 1.5; }
+.pwa-text b      { color: var(--gold); font-weight: 700; }
 .pwa-ok {
-  flex-shrink: 0;
-  background: var(--gold);
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  padding: 9px 16px;
-  font-size: 0.86em;
-  font-weight: 700;
-  font-family: inherit;
-  cursor: pointer;
-  white-space: nowrap;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0; background: var(--gold); color: #fff; border: none;
+  border-radius: 10px; padding: 9px 16px; font-size: 0.86em; font-weight: 700;
+  font-family: inherit; cursor: pointer; white-space: nowrap;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
   transition: opacity 0.15s, transform 0.1s;
 }
 .pwa-ok:active { opacity: 0.8; transform: scale(0.96); }
 .pwa-x {
-  flex-shrink: 0;
-  background: rgba(255,255,255,0.12);
-  color: rgba(255,255,255,0.75);
-  border: none;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  font-size: 0.82em;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0; background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.75);
+  border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 0.82em;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
   transition: background 0.15s;
 }
 .pwa-x:active { background: rgba(255,255,255,0.25); }
