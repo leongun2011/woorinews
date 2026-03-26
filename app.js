@@ -1,9 +1,9 @@
-'use strict'; 
+'use strict';
 
 // ══════════════════════════════════════════════════════════
 //  설정 (bank_news_scraper.py 동일)
 // ══════════════════════════════════════════════════════════
-const DEFAULT_KEYWORDS   = ["금융","은행","핀테크","디지털금융","글로벌금융","연준","국제금융"];
+const DEFAULT_KEYWORDS   = ["금융","은행","핀테크","디지털금융","글로벌금융","연준","국제금융","금융감독원"];
 const MAX_RSS            = 300;
 const SIMILARITY_THRESH  = 0.6;
 const RECENT_COMPARE     = 30;
@@ -25,6 +25,11 @@ function timeoutSignal(ms) {
 //  키워드 중요도 (bank_news_scraper.py 동일)
 // ══════════════════════════════════════════════════════════
 const SCORE_KEYWORDS = {
+  6: ["검사","현장검사","종합검사","부문검사","특별검사","정기검사",
+      "금융감독원","금감원","검사결과","검사착수","감독당국",
+      "제재심의","조치","경영실태평가","적기시정조치",
+      "은행제재","은행 제재","금융제재","제재조치",
+      "금융사고","은행사고","내부통제","횡령사고","금융범죄"],
   5: ["파산","부도","파탄","뱅크런","금융위기","영업정지","영업취소",
       "기준금리","금리인상","금리인하","긴급조치","긴급",
       "제재","제재금","과징금","검찰","수사","구속","기소",
@@ -44,7 +49,7 @@ const SCORE_KEYWORDS = {
 };
 
 function keywordScore(title) {
-  for (const score of [5,4,3,2]) {
+  for (const score of [6,5,4,3,2]) {
     for (const kw of SCORE_KEYWORDS[score]) {
       if (title.includes(kw)) return score;
     }
@@ -369,7 +374,8 @@ function escapeHTML(str) {
 
 function renderStars(score) {
   if (!score || score < 1) return '';
-  const s = Math.min(5, Math.max(1, parseInt(score)));
+  const s = Math.min(6, Math.max(1, parseInt(score)));
+  if (s === 6) return '★★★★★★';
   return '★'.repeat(s) + '☆'.repeat(5 - s);
 }
 
