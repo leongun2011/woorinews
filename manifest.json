@@ -35,8 +35,8 @@
     }
   ],
   "display_override": [
-    "standalone",
     "minimal-ui",
     "browser"
-  ]
+  ],
+  "scope": "/"
 }
