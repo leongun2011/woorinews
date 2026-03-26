@@ -3,7 +3,7 @@
 // ══════════════════════════════════════════════════════════
 //  설정 (bank_news_scraper.py 동일)
 // ══════════════════════════════════════════════════════════
-const DEFAULT_KEYWORDS   = ["금융","은행","핀테크","디지털금융","글로벌금융","연준","국제금융"];
+const DEFAULT_KEYWORDS   = ["금융","은행","핀테크","디지털금융","글로벌금융","연준","국제금융","금융감독원"];
 const MAX_RSS            = 300;
 const SIMILARITY_THRESH  = 0.6;
 const RECENT_COMPARE     = 30;
@@ -25,6 +25,11 @@ function timeoutSignal(ms) {
 //  키워드 중요도 (bank_news_scraper.py 동일)
 // ══════════════════════════════════════════════════════════
 const SCORE_KEYWORDS = {
+  6: ["검사","현장검사","종합검사","부문검사","특별검사","정기검사",
+      "금융감독원","금감원","검사결과","검사착수","감독당국",
+      "제재심의","조치","경영실태평가","적기시정조치",
+      "은행제재","은행 제재","금융제재","제재조치",
+      "금융사고","은행사고","내부통제","횡령사고","금융범죄"],
   5: ["파산","부도","파탄","뱅크런","금융위기","영업정지","영업취소",
       "기준금리","금리인상","금리인하","긴급조치","긴급",
       "제재","제재금","과징금","검찰","수사","구속","기소",
@@ -44,7 +49,7 @@ const SCORE_KEYWORDS = {
 };
 
 function keywordScore(title) {
-  for (const score of [5,4,3,2]) {
+  for (const score of [6,5,4,3,2]) {
     for (const kw of SCORE_KEYWORDS[score]) {
       if (title.includes(kw)) return score;
     }
@@ -369,7 +374,8 @@ function escapeHTML(str) {
 
 function renderStars(score) {
   if (!score || score < 1) return '';
-  const s = Math.min(5, Math.max(1, parseInt(score)));
+  const s = Math.min(6, Math.max(1, parseInt(score)));
+  if (s === 6) return '★★★★★★';
   return '★'.repeat(s) + '☆'.repeat(5 - s);
 }
 
@@ -430,7 +436,7 @@ function renderStars(score) {
         setTimeout(() => { location.href = chromeIntent; }, 1500);
       }
 
-      // ★ 페이지 로드 즉시 Brave 자동 실행 시도 (Brave 미설치 시 아무 일도 안 일어남)
+      // ★ 페이지 로드 즉시 Brave 자동 실행 시도 (미설치 시 아무 일도 안 일어남)
       setTimeout(() => { location.href = braveIntent; }, 300);
 
       banner.innerHTML = `
@@ -438,9 +444,7 @@ function renderStars(score) {
           <img src="icon-192.png" style="width:44px;height:44px;border-radius:10px;flex-shrink:0;">
           <div style="flex:1;min-width:0;">
             <div style="font-weight:700;font-size:0.92em;margin-bottom:4px;">브라우저에서 열기</div>
-            <div style="font-size:0.76em;color:rgba(255,255,255,0.8);line-height:1.5;">
-              Brave가 설치돼 있으면 자동으로 열립니다.<br>아래 버튼으로 직접 선택할 수도 있어요.
-            </div>
+            <div style="font-size:0.76em;color:rgba(255,255,255,0.8);line-height:1.5;">Brave가 설치돼 있으면 자동으로 열립니다.<br>아래 버튼으로 직접 선택할 수도 있어요.</div>
           </div>
           <button id="kakao-x" style="flex-shrink:0;background:rgba(255,255,255,0.15);color:#fff;
             border:none;border-radius:50%;width:30px;height:30px;font-size:0.82em;
@@ -525,80 +529,47 @@ function renderStars(score) {
     }
   }
 
-  // Android/Chrome → beforeinstallprompt 대기
-  // ★ Brave가 감지되면 PWA 설치 프롬프트를 Brave 우선으로 처리
-  const ANDROID_BANNER_KEY    = 'pwa_banner_closed';
-  const ANDROID_BANNER_EXPIRE = 24 * 60 * 60 * 1000;
-  function isAndroidBannerSnoozed() {
-    try {
-      const ts = localStorage.getItem(ANDROID_BANNER_KEY);
-      return ts && (Date.now() - parseInt(ts)) < ANDROID_BANNER_EXPIRE;
-    } catch { return false; }
+  // ── 24시간 스누즈 공통 유틸 ────────────────────────────
+  const BANNER_KEY    = 'pwa_banner_closed';
+  const BANNER_EXPIRE = 24 * 60 * 60 * 1000;
+  function isBannerSnoozed() {
+    try { const ts = localStorage.getItem(BANNER_KEY); return ts && (Date.now() - parseInt(ts)) < BANNER_EXPIRE; } catch { return false; }
   }
-  function snoozeAndroidBanner() {
-    try { localStorage.setItem(ANDROID_BANNER_KEY, Date.now()); } catch {}
+  function snoozeBanner() {
+    try { localStorage.setItem(BANNER_KEY, Date.now()); } catch {}
+  }
+  function attachSnoozeToX(delay = 100) {
+    setTimeout(() => {
+      const xBtn = document.getElementById('pwa-x');
+      if (xBtn) xBtn.addEventListener('click', snoozeBanner, { once: true });
+    }, delay);
   }
 
+  // Android/Chrome → beforeinstallprompt 대기 (24시간 스누즈 적용)
+  // ★ Brave가 감지되면 PWA 설치 프롬프트를 Brave 우선으로 처리
   window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault();
     deferredPrompt = e;
-    if (isAndroidBannerSnoozed()) return;   // ★ 24시간 내 닫은 경우 표시 안 함
+    if (isBannerSnoozed()) return;
     buildBanner('android');
-    // ✕ 닫으면 24시간 스누즈
-    setTimeout(() => {
-      const xBtn = document.getElementById('pwa-x');
-      if (xBtn) xBtn.addEventListener('click', snoozeAndroidBanner, { once: true });
-    }, 100);
+    attachSnoozeToX();
   });
 
   // ★ Brave 브라우저에서 직접 접속한 경우 → 헤더 설치버튼 즉시 노출
   if (isBrave) {
-    const $btn = document.getElementById('install-btn');
-    if ($btn) $btn.style.display = 'block';
+    const $b = document.getElementById('install-btn');
+    if ($b) $b.style.display = 'block';
   }
 
-  // iOS → Safari 여부에 따라 분기
+  // iOS 분기
   if (isIOS) {
-    const BANNER_KEY     = 'pwa_banner_closed';
-    const BANNER_EXPIRE  = 24 * 60 * 60 * 1000; // 24시간
-
-    function isBannerSnoozed() {
-      try {
-        const ts = localStorage.getItem(BANNER_KEY);
-        return ts && (Date.now() - parseInt(ts)) < BANNER_EXPIRE;
-      } catch { return false; }
-    }
-    function snoozeBanner() {
-      try { localStorage.setItem(BANNER_KEY, Date.now()); } catch {}
-    }
-
-    // buildBanner를 닫을 때 snooze 처리하도록 래핑
-    const _origBuildBanner = buildBanner;
-    function buildBannerWithSnooze(type) {
-      _origBuildBanner(type);
-      // ✕ 버튼에 snooze 추가
-      setTimeout(() => {
-        const xBtn = document.getElementById('pwa-x');
-        if (xBtn) {
-          xBtn.addEventListener('click', snoozeBanner, { once: true });
-        }
-      }, 100);
-    }
-
     if (!isSafari) {
-      // ★ Safari 아닌 iOS 브라우저 → "Safari에서 열어야 합니다" 안내 배너
+      // ★ Safari 아닌 iOS 브라우저 → Safari 유도 배너 (24시간 스누즈)
       if (!isBannerSnoozed()) {
         setTimeout(() => {
           const b = document.createElement('div');
           b.id = 'ios-safari-banner';
-          b.style.cssText = `
-            position:fixed; bottom:0; left:0; right:0; z-index:99999;
-            background:linear-gradient(135deg,#1a3a5c,#1e4a78);
-            color:#fff; padding:16px;
-            box-shadow:0 -4px 20px rgba(0,0,0,0.3);
-            font-family:'Noto Sans KR',sans-serif;
-            transition: transform 0.3s ease;
-          `;
+          b.style.cssText = "position:fixed;bottom:0;left:0;right:0;z-index:99999;background:linear-gradient(135deg,#1a3a5c,#1e4a78);color:#fff;padding:16px;box-shadow:0 -4px 20px rgba(0,0,0,0.3);font-family:'Noto Sans KR',sans-serif;";
           b.innerHTML = `
             <div style="display:flex;align-items:center;gap:12px;">
               <img src="icon-192.png" style="width:44px;height:44px;border-radius:10px;flex-shrink:0;">
@@ -610,30 +581,24 @@ function renderStars(score) {
                   하단 <b style="color:#f39c12;">공유 □↑ → 홈 화면에 추가</b>를 눌러주세요.
                 </div>
               </div>
-              <button id="ios-safari-x" style="flex-shrink:0;background:rgba(255,255,255,0.15);color:#fff;
-                border:none;border-radius:50%;width:30px;height:30px;font-size:0.82em;
-                cursor:pointer;align-self:flex-start;">✕</button>
+              <button id="ios-safari-x" style="flex-shrink:0;background:rgba(255,255,255,0.15);color:#fff;border:none;border-radius:50%;width:30px;height:30px;font-size:0.82em;cursor:pointer;align-self:flex-start;">✕</button>
             </div>
           `;
           document.body.appendChild(b);
-          document.getElementById('ios-safari-x').addEventListener('click', () => {
-            snoozeBanner();
-            b.remove();
-          });
+          document.getElementById('ios-safari-x').addEventListener('click', () => { snoozeBanner(); b.remove(); });
         }, 800);
       }
     } else {
       // ★ Safari → 24시간 스누즈 적용한 PWA 배너
       if (!isBannerSnoozed()) {
-        setTimeout(() => buildBannerWithSnooze('ios'), 800);
+        setTimeout(() => { buildBanner('ios'); attachSnoozeToX(); }, 800);
       }
     }
   }
 
-  // 헤더 설치 버튼
+  // 헤더 설치 버튼 (iOS Safari 또는 Android일 때만 표시)
   const $btn = document.getElementById('install-btn');
   if ($btn) {
-    // iOS Safari가 아니면 버튼 숨김 (눌러도 PWA 설치 안 되므로)
     if (!isIOS || isSafari) $btn.style.display = 'block';
     $btn.addEventListener('click', () => {
       if (deferredPrompt) deferredPrompt.prompt();
