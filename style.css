@@ -446,12 +446,13 @@ header {
 .pwa-x:active { background: rgba(255,255,255,0.25); }
 /* ── ⓘ 중요도 설명 버튼 ─────────────────────────────────── */
 .score-info-btn {
+  flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 16px;
-  height: 16px;
-  margin-left: 4px;
+  width: 17px;
+  height: 17px;
+  margin: 0 2px 0 3px;
   background: none;
   border: 1.5px solid #aaa;
   border-radius: 50%;
@@ -459,12 +460,12 @@ header {
   font-size: 0.65em;
   font-weight: 700;
   cursor: pointer;
-  vertical-align: middle;
   line-height: 1;
   padding: 0;
   transition: border-color 0.15s, color 0.15s;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+  min-width: 17px; /* 터치 영역 보조 */
 }
 .score-info-btn:active,
 .score-info-btn:hover {
