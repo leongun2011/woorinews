@@ -57,7 +57,7 @@ header {
 }
 .header-title {
   font-family: 'Playfair Display', 'Georgia', serif;
-  font-size: 1.05em;
+  font-size: clamp(0.72em, 4.2vw, 1.05em); /* ★ 모바일 작은 화면에서 자동 축소 */
   font-weight: 700;
   background: linear-gradient(135deg, #1a3a5c 0%, #2980b9 60%, #1a3a5c 100%);
   -webkit-background-clip: text;
@@ -65,8 +65,8 @@ header {
   background-clip: text;
   flex: 1;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;        /* ★ hidden → visible 로 변경 */
+  min-width: 0;             /* ★ flex 자식 텍스트 잘림 방지 */
 }
 .install-btn {
   flex-shrink: 0;
